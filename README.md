@@ -1,2 +1,2 @@
 # testweb
-python dajango web app
+python django web app
