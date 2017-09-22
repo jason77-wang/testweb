@@ -21,6 +21,7 @@ from . import testdb
 from . import getdb
 from . import changedb
 from . import deletedb
+from . import search, search2
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
@@ -29,4 +30,7 @@ urlpatterns = [
     url(r'^getdb$', getdb.getdb),
     url(r'^changedb$', changedb.changedb),
     url(r'^deletedb$', deletedb.deletedb),
+    url(r'^search$', search.search),
+    url(r'^search-form$', search.search_form),
+    url(r'^search-post$', search2.search_post),
 ]
