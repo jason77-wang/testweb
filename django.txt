@@ -51,6 +51,19 @@ sudo apt-get install mysql-server
 sudo apt-get install python-pymysql
 sudo service mysql start
 
+install on a new machine:
+sudo apt install python-django
+sudo apt-get install mysql-client
+sudo apt-get install mysql-server
+16.04:
+sudo apt-get install python-pymysql
+
+
+14.04:
+sudo apt-get install python-pip
+sudo apt-get install libmysqlclient-dev libmysqld-dev python-dev python-setuptools
+sudo pip install MySQL-python
+
 
 
 8) set root user password and login:
