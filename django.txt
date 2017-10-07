@@ -1,0 +1,448 @@
+django:
+
+
+
+1) create a project:
+
+$ django-admin.py startproject testweb
+
+
+
+2) start a server:
+
+$ python manage.py runserver
+or
+$ python manage.py runserver 0.0.0.0:8000
+
+
+
+3) Adding URLs (based on function, class and including other URLconf):
+from . import view
+based on function:    url(r'^$', view.hello),
+/*this make the root page to view.py->function.hello
+
+
+4) import package
+   import package.class
+   import package.class.function/member
+   or
+   from package import class
+   from package.class import function/member
+
+sometimes, package and class has the same name.
+
+
+
+
+5) adding template path (e.g. ./templates)
+edit settings.py to add: 'DIRS': [BASE_DIR+"/templates",],  in TEMPLATES [ section
+
+
+
+6) template is html, and it can be inherited between templates
+inherit: {% extends "base.html" %}
+call template from py file: render(request, 'hello.html', context)
+
+
+
+7) install mysql 
+sudo apt-get install mysql-client
+sudo apt-get install mysql-server
+sudo apt-get install python-pymysql
+sudo service mysql start
+
+
+
+8) set root user password and login:
+mysqladmin -u root password "new_password"
+mysql -u root -p //to login
+./mysqladmin -u root -p shutdown  //shutdown mysql server
+
+
+
+9) create new users
+GRANT USAGE ON *.* TO 'test'@'localhost' IDENTIFIED BY 'test1234' WITH GRANT OPTION;
+SHOW DATABASES;
+SHOW TABLES;
+================================================
+mysql -u root -p
+mysql> create database web;
+mysql> use web;
+mysql> create user 'testweb'@'localhost' identified by 'testweb1234';
+mysql> show databases;
+mysql> use mysql;
+mysql> select * from user where User='testweb';
+mysql> use web;
+mysql> grant all privileges on web.* to testweb@localhost identified by 'testweb1234';
+mysql> grant all privileges on web.* to test@localhost;
+
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'web',
+        'USER': 'test',
+        'PASSWORD': 'test1234',
+        'HOST':'localhost',
+        'PORT':'3306',        
+
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'web',
+        'USER': 'testweb',
+        'PASSWORD': 'testweb1234',
+        'HOST':'localhost',
+        'PORT':'3306',        
+
+
+
+10) config database in django(use mysql root user):
+mysql -u root -p
+create database csvt default charset=utf8;
+settings.py
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql','
+        'NAME': 'mysql',
+        'USER': 'root',
+        'PASSWORD': 'wh8hht',
+        'HOST':'localhost',
+        'PORT':'3306',
+    }
+}
+
+
+
+
+11) create model to use database(web) we created before:
+cd ~/testweb
+dajango-admin startapp Article
+hwang4@hwang4-Inspiron-7447:~/testweb/Article$ tree
+.
+├── admin.py
+├── __init__.py
+├── migrations
+│   └── __init__.py
+├── models.py
+├── tests.py
+└── views.py
+
+edit models.py as below:
+hwang4@hwang4-Inspiron-7447:~/testweb/Article$ cat models.py
+from django.db import models
+
+# Create your models here.
+class Test(models.Model):
+    name = models.CharField(max_length=20)
+以上的类名代表了数据库表名(Article_Test)，且继承了models.Model，类里面的字段代表数据表中的字段(name)，
+数据类型则由CharField（相当于varchar）、DateField（相当于datetime）， max_length 参数限定长度。
+
+Install this app to main project (via settings.py):
+edit settings.py to find the INSTALLED_APPS = (
+and add 'Article', in this section
+
+$ python manage.py migrate   # 创建表结构
+create 9~10 tables according to sys default INSTALLED_APPS = (
+auth_xxx
+django_xxx
+
+$ python manage.py makemigrations Article  # 让 Django 知道我们在我们的模型有一些变更
+$ python manage.py migrate Article   # 创建表结构 表名组成结构为：应用名_类名（如：Article_Test）。
+create table "Article_Test" in the database "web"
+to check:
+use web;
+show tables;
+mysql> show columns from Article_test;
+or
+mysql> describe Article_test;
+
+
+
+
+12) insert data into the table Article_Test of the database web:
+create testdb.py:
+hwang4@hwang4-Inspiron-7447:~/testweb/testweb$ cat testdb.py 
+# -*- coding: utf-8 -*-
+ 
+from django.http import HttpResponse
+ 
+from Article.models import Test
+ 
+# 数据库操作
+def testdb(request):
+    test1 = Test(name='runoob')  #create class Test an instanace with init var name = 'runoob'
+    test1.save() #since Test inherit models.Model, it has member function save()
+    return HttpResponse("<p>数据添加成功！</p>")
+
+link the testdb to url:
+from . import testdb
+edit urls.py to add     url(r'^testdb$', testdb.testdb),
+
+to check value of name after insersion:
+mysql> select name from Article_test;
+
+
+
+13) get the data from database:
+similar to testdb, to create getdb.py and add url in the urls.py
+hwang4@hwang4-Inspiron-7447:~/testweb/testweb$ cat getdb.py
+
+# -*- coding: utf-8 -*-
+ 
+from django.http import HttpResponse
+ 
+from Article.models import Test
+ 
+# 数据库操作
+def getdb(request):
+    # 初始化
+    response = ""
+    response1 = ""
+    
+    
+    # 通过objects这个模型管理器的all()获得所有数据行，相当于SQL中的SELECT * FROM
+    list = Test.objects.all()
+        
+    # filter相当于SQL中的WHERE，可设置条件过滤结果
+    response2 = Test.objects.filter(id=1) 
+    
+    # 获取单个对象
+    response3 = Test.objects.get(id=1) 
+    
+    # 限制返回的数据 相当于 SQL 中的 OFFSET 0 LIMIT 2;
+    Test.objects.order_by('name')[0:2]
+    
+    #数据排序
+    Test.objects.order_by("id")
+    
+    # 上面的方法可以连锁使用
+    Test.objects.filter(name="runoob").order_by("id")
+    
+    # 输出所有数据
+    for var in list:
+        response1 += var.name + " "
+    response = response1
+    return HttpResponse("<p>" + response + "</p>")
+
+
+
+14) change table name and save:
+hwang4@hwang4-Inspiron-7447:~/testweb/testweb$ cat changedb.py
+# -*- coding: utf-8 -*-
+ 
+from django.http import HttpResponse
+ 
+from Article.models import Test
+ 
+# 数据库操作
+def changedb(request):
+    # 修改其中一个id=1的name字段，再save，相当于SQL中的UPDATE
+    test1 = Test.objects.get(id=1)
+    test1.name = 'Google'
+    test1.save()
+    
+    # 另外一种方式
+    #Test.objects.filter(id=1).update(name='Google')
+    
+    # 修改所有的列
+    # Test.objects.all().update(name='Google')
+    
+    return HttpResponse("<p>修改成功</p>")
+
+after that, the content of name is "Google" instead of "runfoo"
+
+15) delete name value from db, not delete var name, delete content of name
+hwang4@hwang4-Inspiron-7447:~/testweb/testweb$ cat deletedb.py
+
+# -*- coding: utf-8 -*-
+ 
+from django.http import HttpResponse
+ 
+from Article.models import Test
+ 
+# 数据库操作
+def deletedb(request):
+    # 删除id=1的数据
+    test1 = Test.objects.get(id=1)
+    test1.delete()
+    
+    # 另外一种方式
+    # Test.objects.filter(id=1).delete()
+    
+    # 删除所有数据
+    # Test.objects.all().delete()
+    
+    return HttpResponse("<p>删除成功</p>")
+after that, name = NULL
+
+
+
+16) table (static html file) and GET and POST method:
+GET two web pages: (send get command via html)
+hwang4@hwang4-Inspiron-7447:~/study/testweb/testweb$ cat search.py
+
+# -*- coding: utf-8 -*-
+ 
+from django.http import HttpResponse
+from django.shortcuts import render_to_response
+import sys
+
+
+# 表单
+def search_form(request):
+    return render_to_response('search_form.html')
+ 
+# 接收请求数据
+def search(request):
+    reload(sys)
+    sys.setdefaultencoding('utf8')
+    request.encoding='utf-8'
+    if 'q' in request.GET:
+        message = '你搜索的内容为: ' + request.GET['q']
+    else:
+        message = '你提交了空表单'
+    return HttpResponse(message)
+
+
+hwang4@hwang4-Inspiron-7447:~/study/testweb/testweb$ cat ../templates/search_form.html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>菜鸟教程(runoob.com)</title>
+</head>
+<body>
+    <form action="/search" method="get">
+        <input type="text" name="q">
+        <input type="submit" value="搜索">
+    </form>
+</body>
+</html>
+
+
+POST: only single web page (send POST command via html):
+hwang4@hwang4-Inspiron-7447:~/study/testweb/testweb$ cat search2.py
+# -*- coding: utf-8 -*-
+ 
+from django.shortcuts import render
+from django.views.decorators import csrf
+ 
+# 接收POST请求数据
+def search_post(request):
+    ctx ={}
+    if request.POST:
+        ctx['rlt'] = request.POST['q']
+    return render(request, "post.html", ctx)
+
+hwang4@hwang4-Inspiron-7447:~/study/testweb/testweb$ cat ../templates/post.html
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>菜鸟教程(runoob.com)</title>
+</head>
+<body>
+    <form action="/search-post" method="post">
+        {% csrf_token %}
+        <input type="text" name="q">
+        <input type="submit" value="Submit">
+    </form>
+ 
+    <p>{{ rlt }}</p>
+</body>
+</html>
+
+
+
+17) django admin
+http://localhost:8000/admin/
+
+create superuser:
+python manage.py createsuperuser
+
+add Article.Test to admin page:
+edit Article/admin.py:
+hwang4@hwang4-Inspiron-7447:~/study/testweb/Article$ cat admin.py
+from django.contrib import admin
+from Article.models import Test
+ 
+# Register your models here.
+admin.site.register(Test)
+
+# Create more class in Article/models.py
+class Contact(models.Model):
+    name   = models.CharField(max_length=200)
+    age    = models.IntegerField(default=0)
+    email  = models.EmailField()
+    def __unicode__(self):
+        return self.name
+ 
+class Tag(models.Model):
+    contact = models.ForeignKey(Contact)
+    name    = models.CharField(max_length=50)
+    def __unicode__(self):
+        return self.name
+
+class tag use contact to pointer to class Contact instance.
+python manage.py makemigrations Article
+python manage.py migrate Article
+
+# add more class in the admin page, edit Article/admin.py:
+from Article.models import Tag
+from Article.models import Contact
+admin.site.register([Test, Contact, Tag])
+
+
+
+18) replace default admin page:
+Edit Article/admin.py: (only show name and email)
+hwang4@hwang4-Inspiron-7447:~/study/testweb/Article$ cat admin.py
+from django.contrib import admin
+from Article.models import Test
+from Article.models import Tag
+from Article.models import Contact
+ 
+# Register your models here.
+#admin.site.register([Test, Contact, Tag])
+class ContactAdmin(admin.ModelAdmin):
+    fields = ('name', 'email')
+ 
+admin.site.register(Contact, ContactAdmin)
+admin.site.register([Test, Tag])
+
+Or
+
+class ContactAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ['Main',{
+            'fields':('name','email'),
+        }],
+        ['Advance',{
+            'classes': ('collapse',), # CSS
+            'fields': ('age',),
+        }]
+    )
+
+
+
+
+19) inline show: show tag while show contact (relationship)
+
+# Register your models here.
+class TagInline(admin.TabularInline):
+    model = Tag
+ 
+class ContactAdmin(admin.ModelAdmin):
+    list_display = ('name','age', 'email') # list add 3 columns
+    search_fields = ('name',) //add search box for name
+    inlines = [TagInline]  # Inline show inlines
+    fieldsets = (
+        ['Main',{
+            'fields':('name','email'),
+        }],
+        ['Advance',{
+            'classes': ('collapse',),
+            'fields': ('age',),
+        }]
+ 
+    )
+
+
+
