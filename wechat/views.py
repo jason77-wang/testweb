@@ -1,9 +1,10 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 import hashlib
+from django.views.decorators.csrf import csrf_exempt
 
 WEIXIN_TOKEN = 'xiaochuchinese'
-
+@csrf_exempt
 # Create your views here.
 def main(request):
 #    print request
@@ -26,8 +27,9 @@ def main(request):
         else:
             return HttpResponse("weixin  index")
     else:
-        xml_str = smart_str(request.body)
-        request_xml = etree.fromstring(xml_str)
-        response_xml = auto_reply_main(request_xml)
-        return HttpResponse(response_xml)
+#        xml_str = smart_str(request.body)
+#        request_xml = etree.fromstring(xml_str)
+#        response_xml = auto_reply_main(request_xml)
+#        return HttpResponse(response_xml)
+        return HttpResponse('welcome!')
 
