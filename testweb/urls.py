@@ -22,6 +22,7 @@ from . import getdb
 from . import changedb
 from . import deletedb
 from . import search, search2
+from wechat import views
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
@@ -33,4 +34,5 @@ urlpatterns = [
     url(r'^search$', search.search),
     url(r'^search-form$', search.search_form),
     url(r'^search-post$', search2.search_post),
+    url(r'^wechat$', views.main),
 ]

@@ -459,3 +459,12 @@ class ContactAdmin(admin.ModelAdmin):
 
 
 
+20) create a wechat backend app
+
+django-admin startapp wechat
+
+edit settings.py to add wechat to installed app
+
+edit urls.py to add:
+from wechat import views
+url(r'^wechat$', views.main),
