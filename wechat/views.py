@@ -2,6 +2,10 @@ from django.shortcuts import render
 from django.http import HttpResponse
 import hashlib
 from django.views.decorators.csrf import csrf_exempt
+import json
+from lxml import etree
+from django.utils.encoding import smart_str
+from django.http import HttpResponse
 
 WEIXIN_TOKEN = 'xiaochuchinese'
 @csrf_exempt
@@ -27,9 +31,13 @@ def main(request):
         else:
             return HttpResponse("weixin  index")
     else:
-#        xml_str = smart_str(request.body)
-#        request_xml = etree.fromstring(xml_str)
-#        response_xml = auto_reply_main(request_xml)
-#        return HttpResponse(response_xml)
-        return HttpResponse('welcome!')
+        xml_str = smart_str(request.body)
+        request_xml = etree.fromstring(xml_str)
+        response_xml = request_xml
+        response_xml.ToUserName = request_xml.FromUserName
+        response_xml.FromUserName = request_xml.ToUserName
+        print request_xml
+        print response_xml
+        return HttpResponse(response_xml)
+
 
