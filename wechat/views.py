@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 import hashlib
 
-WEIXIN_TOKEN = 'write-a-value'
+WEIXIN_TOKEN = 'xiaochuwechat'
 
 # Create your views here.
 def main(request):
