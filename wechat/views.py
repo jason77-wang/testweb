@@ -11,7 +11,7 @@ WEIXIN_TOKEN = 'xiaochuchinese'
 @csrf_exempt
 # Create your views here.
 def main(request):
-#    print request
+    print request
     if request.method == "GET":
         signature = request.GET.get("signature", None)
         print signature
@@ -30,14 +30,19 @@ def main(request):
             return HttpResponse(echostr)
         else:
             return HttpResponse("weixin  index")
-    else:
+        
+    elif request.method == "POST":
         xml_str = smart_str(request.body)
         request_xml = etree.fromstring(xml_str)
         response_xml = request_xml
-        response_xml.ToUserName = request_xml.FromUserName
-        response_xml.FromUserName = request_xml.ToUserName
-        print request_xml
-        print response_xml
-        return HttpResponse(response_xml)
+        c1 = request_xml[0]
+        c2 = request_xml[1]
+        tmp = c1.text
+
+        response_xml[0].text = c2.text
+        response_xml[1].text = tmp
+        response_xml[4].text = "welcome!"
+        print etree.tostring(response_xml)
+        return HttpResponse(etree.tostring(response_xml))
 
 
