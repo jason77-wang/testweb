@@ -1,3 +1,5 @@
+# coding: UTF-8
+import chardet
 import os
 import linecache
 import random
@@ -18,4 +20,5 @@ def testfile():
                 break
 
     fd.close()
+
     return content

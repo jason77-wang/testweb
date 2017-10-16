@@ -1,5 +1,5 @@
 # coding: UTF-8
-
+import chardet
 from django.shortcuts import render
 from django.http import HttpResponse
 import hashlib
@@ -46,9 +46,10 @@ def main(request):
         c1 = request_xml[0]
         c2 = request_xml[1]
         txt = request_xml[4]
-        if txt == "听写":
-            txt = processfile.testfile()
-            smsg = tpl % (c2.text, c1.text, txt.text)
+        
+        if txt.text == u"听写":
+            text = processfile.testfile()
+            smsg = tpl % (c2.text, c1.text, text.decode('utf-8'))
         else:
 	    smsg = tpl % (c2.text, c1.text, u"您发的内容为: "+txt.text)
 #	smsg = tpl % (c2.text, c1.text, u"字符编码声明")
