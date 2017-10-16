@@ -8,6 +8,7 @@ import json
 from lxml import etree
 from django.utils.encoding import smart_str
 from django.http import HttpResponse
+import processfile
 
 WEIXIN_TOKEN = 'xiaochuchinese'
 @csrf_exempt
@@ -25,6 +26,7 @@ def main(request):
         tmp_list.sort()
         tmp_str = "%s%s%s" % tuple(tmp_list)
         tmp_str = hashlib.sha1(tmp_str).hexdigest()
+
         if tmp_str == signature:
             return HttpResponse(echostr)
         else:
@@ -44,8 +46,11 @@ def main(request):
         c1 = request_xml[0]
         c2 = request_xml[1]
         txt = request_xml[4]
-
-	smsg = tpl % (c2.text, c1.text, u"您发的内容为: "+txt.text)
+        if txt == "听写":
+            txt = processfile.testfile()
+            smsg = tpl % (c2.text, c1.text, txt.text)
+        else:
+	    smsg = tpl % (c2.text, c1.text, u"您发的内容为: "+txt.text)
 #	smsg = tpl % (c2.text, c1.text, u"字符编码声明")
 #        print smsg
         return HttpResponse(smsg)
